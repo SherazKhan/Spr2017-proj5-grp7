@@ -4,6 +4,7 @@ Term: Spring 2017
 
 + Team # 7
 + Projec title: H1B Deny Analysis Shiny App
++ Dataset: 3 million records of H-1B Visa Petitions
 + Team members
 	+ Yifei Lin, yl3594
 	+ Vanessa Huang, yh2873
