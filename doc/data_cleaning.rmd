@@ -1,0 +1,33 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+h1b=read.csv("h1b_kaggle.csv")
+
+index1=which(h1b$CASE_STATUS=="CERTIFIED")
+index2=which(h1b$CASE_STATUS=="DENIED")
+index3=which(h1b$CASE_STATUS=="CERTIFIED-WITHDRAWN")
+index4=which(h1b$CASE_STATUS=="WITHDRAWN")
+index=c(index1,index2,index3,index4)
+h1b=h1b[index,]
+
+
+h1b=h1b[!is.na(h1b$lon),]
+h1b=h1b[!is.na(h1b$lat),]
+
+h1b$SOC_NAME=as.factor(toupper(h1b$SOC_NAME))
+h1b[which(h1b$SOC_NAME=="COMPUTER OCCUPATIONS, ALL OTHER*"),"SOC_NAME"]="COMPUTER OCCUPATIONS, ALL OTHER"
+h1b[which(h1b$SOC_NAME=="NETWORK AND COMPUTER SYSTEMS ADMINISTRATORS*"),"SOC_NAME"]="NETWORK AND COMPUTER SYSTEMS ADMINISTRATORS"
+
+h1b$WORKSITE<-as.character(h1b$WORKSITE)
+citystate <-data.frame(matrix(unlist(strsplit(h1b$WORKSITE,", ")),ncol = 2,byrow = T))
+colnames(citystate)=c("CITY","STATE")
+h1b=cbind(h1b,citystate)
+
+
+```
+
