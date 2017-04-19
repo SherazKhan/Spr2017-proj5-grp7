@@ -11,7 +11,10 @@ Term: Spring 2017
 	+ Yuxi Zhou, yz3048
 	+ Siyuan Yao, sy2696
 	+ Chengcen Zhou, cz2432
-+ Project summary: 
+	
++ Project summary: The H-1B is an employment-based, non-immigrant visa category for temporary foreign workers in the United States. For a foreign national to apply for H1-B visa, an US employer must offer a job and petition for H-1B visa with the US immigration department. This is the most common visa status applied for and held by international students once they complete college/ higher education (Masters, PhD) and work in a full-time position.
+
++ The Office of Foreign Labor Certification (OFLC) generates program data that is useful information about the immigration programs including the H1-B visa. 
 	
 **Contribution statement**: ([default](doc/a_note_on_contributions.md)) All team members contributed equally in all stages of this project. All team members approve our work presented in this GitHub repository including this contributions statement. 
 
