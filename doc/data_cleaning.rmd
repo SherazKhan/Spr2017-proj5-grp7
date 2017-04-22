@@ -6,8 +6,9 @@ output: html_notebook
 
 
 ```{r}
-h1b=read.csv("h1b_kaggle.csv")
+h1b=read.csv("../data/h1b_kaggle.csv")
 
+## Eliminate records with empty case status
 index1=which(h1b$CASE_STATUS=="CERTIFIED")
 index2=which(h1b$CASE_STATUS=="DENIED")
 index3=which(h1b$CASE_STATUS=="CERTIFIED-WITHDRAWN")
@@ -15,19 +16,23 @@ index4=which(h1b$CASE_STATUS=="WITHDRAWN")
 index=c(index1,index2,index3,index4)
 h1b=h1b[index,]
 
-
+## Eliminate records without worksite coordinates
 h1b=h1b[!is.na(h1b$lon),]
 h1b=h1b[!is.na(h1b$lat),]
 
+## Arrange SOC_name 
 h1b$SOC_NAME=as.factor(toupper(h1b$SOC_NAME))
 h1b[which(h1b$SOC_NAME=="COMPUTER OCCUPATIONS, ALL OTHER*"),"SOC_NAME"]="COMPUTER OCCUPATIONS, ALL OTHER"
 h1b[which(h1b$SOC_NAME=="NETWORK AND COMPUTER SYSTEMS ADMINISTRATORS*"),"SOC_NAME"]="NETWORK AND COMPUTER SYSTEMS ADMINISTRATORS"
 
+## Seperate city and states
 h1b$WORKSITE<-as.character(h1b$WORKSITE)
 citystate <-data.frame(matrix(unlist(strsplit(h1b$WORKSITE,", ")),ncol = 2,byrow = T))
 colnames(citystate)=c("CITY","STATE")
 h1b=cbind(h1b,citystate)
 
+## Save cleaned data
+save(h1b,file="../output/cleaned_data.Rdata")
 
 ```
 
