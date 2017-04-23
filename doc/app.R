@@ -1,7 +1,7 @@
 ## APP ##
 
 #### Install Libraries ####
-packages.used <- c("shiny","shinydashboard")
+packages.used <- c("shiny","shinydashboard","plotly","plyr")
 
 packages.needed <- setdiff(packages.used, 
                            intersect(installed.packages()[,1], 
@@ -15,9 +15,11 @@ if(length(packages.needed)>0){
 #### Library ####
 library(shiny)
 library(shinydashboard)
+library(plotly)
+library(plyr)
 
 #### Source helper functions ####
-
+load("~/GitHub/Spr2017-proj5-grp7/output/cleaned_data.Rdata")
 
 #### Header of the Dashboard ####
 header <- dashboardHeader(
@@ -50,7 +52,33 @@ body <- dashboardBody(
     
     tabItem(tabName = "Graph",
             mainPanel(
-              "HEHE"
+              
+              ## First Graph
+              fluidRow(
+                headerPanel("H1B Trend"),
+                box(
+                  height = 500, 
+                  width = 9,
+                  plotlyOutput("g1")
+                ),
+                box(
+                  height = 500,
+                  width = 3,
+                  sliderInput("case",
+                              label = h3("Case Status"),
+                              choices=list("Certified" = "CERTIFIED",
+                                           "Denied" = "DENIED",
+                                           "Certified-Withdrawn" = "CERTIFIED-WITHDRAWN",
+                                           "Withdrawn" = "WITHDRAWN"),
+                              selected = 1)
+                )
+                
+              )
+              
+              
+              
+              
+              
             ))
   )
 
@@ -68,6 +96,10 @@ ui <- dashboardPage(
 #### Server ####
 server <- function(input,output) {
   
+  ## First graph
+  output$g1 <- renderPlotly(
+    {plot_ly(x=sort(unique(h1b$YEAR)),y =daply(h1b[h1b$CASE_STATUS==input$case,],.(YEAR),nrow),type = "scatter" ,mode = "lines")}
+  )
 }
 
 #### APP ####
