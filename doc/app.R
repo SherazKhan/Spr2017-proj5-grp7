@@ -19,7 +19,7 @@ library(plotly)
 library(plyr)
 
 #### Source helper functions ####
-load("~/GitHub/Spr2017-proj5-grp7/output/cleaned_data.Rdata")
+load("../output/cleaned_data.Rdata")
 
 #### Header of the Dashboard ####
 header <- dashboardHeader(
@@ -64,7 +64,7 @@ body <- dashboardBody(
                 box(
                   height = 500,
                   width = 3,
-                  sliderInput("case",
+                  selectInput("case",
                               label = h3("Case Status"),
                               choices=list("Certified" = "CERTIFIED",
                                            "Denied" = "DENIED",
@@ -74,10 +74,6 @@ body <- dashboardBody(
                 )
                 
               )
-              
-              
-              
-              
               
             ))
   )
