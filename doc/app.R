@@ -51,36 +51,31 @@ body <- dashboardBody(
             )),
     
     tabItem(tabName = "Graph",
-            mainPanel(
-              
+            
               ## First Graph
               fluidRow(
                 headerPanel("H1B Trend"),
-                box(
-                  height = 500, 
-                  width = 9,
-                  plotlyOutput("g1")
-                ),
-                box(
-                  height = 500,
-                  width = 3,
+                column(width=9,
+                  plotlyOutput("g1")),
+                
+                column(width = 3,
                   selectInput("case",
                               label = h3("Case Status"),
                               choices=list("All"= "ALL",
-                                "Certified" = "CERTIFIED",
+                                           "Certified" = "CERTIFIED",
                                            "Denied" = "DENIED",
                                            "Certified-Withdrawn" = "CERTIFIED-WITHDRAWN",
-                                           "Withdrawn" = "WITHDRAWN")
-                              )
-                )
-                
+                                           "Withdrawn" = "WITHDRAWN")),
+                  selectInput("state",
+                              label = h3("State"),
+                              choices=unique(h1b$STATE)
+            )
+          
               )
               
-            ))
-  )
-
+            ))))
   
-)
+
 
 
 #### UI ####
