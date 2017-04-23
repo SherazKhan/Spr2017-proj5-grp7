@@ -66,11 +66,12 @@ body <- dashboardBody(
                   width = 3,
                   selectInput("case",
                               label = h3("Case Status"),
-                              choices=list("Certified" = "CERTIFIED",
+                              choices=list("All"= "ALL",
+                                "Certified" = "CERTIFIED",
                                            "Denied" = "DENIED",
                                            "Certified-Withdrawn" = "CERTIFIED-WITHDRAWN",
-                                           "Withdrawn" = "WITHDRAWN"),
-                              selected = 1)
+                                           "Withdrawn" = "WITHDRAWN")
+                              )
                 )
                 
               )
@@ -94,7 +95,9 @@ server <- function(input,output) {
   
   ## First graph
   output$g1 <- renderPlotly(
-    {plot_ly(x=sort(unique(h1b$YEAR)),y =daply(h1b[h1b$CASE_STATUS==input$case,],.(YEAR),nrow),type = "scatter" ,mode = "lines")}
+    { if(input$case=="ALL") plot_ly(x=sort(unique(h1b$YEAR)),y=daply(h1b,.(YEAR),nrow),type = "scatter" ,mode = "lines")
+    
+      else plot_ly(x=sort(unique(h1b$YEAR)),y=daply(h1b[h1b$CASE_STATUS==input$case,],.(YEAR),nrow),type = "scatter" ,mode = "lines")}
   )
 }
 
