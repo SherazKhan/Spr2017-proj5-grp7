@@ -1,7 +1,7 @@
 ## APP ##
 
 #### Install Libraries ####
-packages.used <- c("shiny","shinydashboard","plotly","plyr")
+packages.used <- c("shiny","shinydashboard","plotly","plyr","dplyr")
 
 packages.needed <- setdiff(packages.used, 
                            intersect(installed.packages()[,1], 
@@ -17,9 +17,11 @@ library(shiny)
 library(shinydashboard)
 library(plotly)
 library(plyr)
+library(dplyr)
 
 #### Source helper functions ####
 load("../output/cleaned_data.Rdata")
+source("../lib/graph_helper.R")
 
 #### Header of the Dashboard ####
 header <- dashboardHeader(
@@ -52,26 +54,55 @@ body <- dashboardBody(
     
     tabItem(tabName = "Graph",
             
-              ## First Graph
+              
               fluidRow(
-                headerPanel("H1B Trend"),
-                column(width=9,
-                  plotlyOutput("g1")),
-                
-                column(width = 3,
-                  selectInput("case",
-                              label = h3("Case Status"),
-                              choices=list("All"= "ALL",
-                                           "Certified" = "CERTIFIED",
-                                           "Denied" = "DENIED",
-                                           "Certified-Withdrawn" = "CERTIFIED-WITHDRAWN",
-                                           "Withdrawn" = "WITHDRAWN")),
-                  selectInput("state",
-                              label = h3("State"),
-                              choices=unique(h1b$STATE)
-            )
-          
-              )
+                tabBox(
+                  title = "",
+                  width = 12,
+                  height = 550,
+                  
+                  ## First Graph
+                  tabPanel(
+                    title = "H1B Trend",
+                    column(width=9,
+                           plotlyOutput("g1")),
+                    
+                    column(width = 3,
+                           selectInput("case1",
+                                       label = h3("Case Status"),
+                                       choices=list("ALL" = "ALL",
+                                                    "Certified" = "CERTIFIED",
+                                                    "Denied" = "DENIED",
+                                                    "Certified-Withdrawn" = "CERTIFIED-WITHDRAWN",
+                                                    "Withdrawn" = "WITHDRAWN")),
+                           selectInput("state1",
+                                       label = h3("State"),
+                                       choices= c("ALL",sort(as.character(unique(h1b$STATE))))
+                           )
+                           
+                    )
+                  )
+                  
+                  ## Second Graph
+                  #tabPanel(
+                  #  title = "H1B Trend",
+                  #  column(width=9,
+                  #         plotlyOutput("g1")),
+                  #  
+                  #  column(width = 3,
+                  #         selectInput("case",
+                  #                     label = h3("Case Status"),
+                  #                     choices=list("All"= "ALL",
+                  #                                  "Certified" = "CERTIFIED",
+                  #                                  "Denied" = "DENIED",
+                  #                                  "Certified-Withdrawn" = "CERTIFIED-WITHDRAWN",
+                  #                                  "Withdrawn" = "WITHDRAWN"))
+                           
+                           
+                  #  )
+                  #)
+                )
+              
               
             ))))
   
@@ -90,9 +121,7 @@ server <- function(input,output) {
   
   ## First graph
   output$g1 <- renderPlotly(
-    { if(input$case=="ALL") plot_ly(x=sort(unique(h1b$YEAR)),y=daply(h1b,.(YEAR),nrow),type = "scatter" ,mode = "lines")
-    
-      else plot_ly(x=sort(unique(h1b$YEAR)),y=daply(h1b[h1b$CASE_STATUS==input$case,],.(YEAR),nrow),type = "scatter" ,mode = "lines")}
+    { g1_generator(input.case = input$case1, input.state =input$state1, h1b) }
   )
 }
 
