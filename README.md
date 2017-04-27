@@ -1,10 +1,10 @@
-# ADS Project 5: "Survival Analysis" - H-1B Deny Analysis Shiny App
+# ADS Project 5: "Survival or Not" - H-1B Deny Analysis Shiny App
 
 ![H1B Visa](http://www.spotlifeasia.com/wp-content/uploads/2017/01/Trump-H1b-Visa.png)
 
 + Term: Spring 2017
 + Team # 7
-+ Projec title: H1B Deny Analysis Shiny App
++ Projec title: H1B Visa Application Analysis Shiny App
 + Dataset: 3 million records of H-1B Visa Petitions
 + Team members
 	+ Yifei Lin, yl3594
