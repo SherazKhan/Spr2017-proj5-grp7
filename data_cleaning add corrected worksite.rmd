@@ -1,0 +1,246 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(readxl)
+library(hashmap)
+setwd("D:/Spr2017-proj5-grp7")
+load("D:/Spr2017-proj5-grp7/output/cleaned_data.Rdata")
+colnames(h1b)
+
+print("Column matching ..")
+{
+   h1b= h1b %>%
+             mutate(CASE_NUMBER = X,
+                    #CASE_STATUS = CASE_STATUS,
+                    #EMPLOYER_NAME = EMPLOYER_NAME,
+                    #SOC_NAME = SOC_NAME,
+                    #JOB_TITLE = JOB_TITLE,
+                    #FULL_TIME_POSITION = FULL_TIME_POSITION,
+                    #PREVAILING_WAGE = PREVAILING_WAGE,
+                    WORKSITE_CITY = CITY,
+                    WORKSITE_STATE = STATE
+                
+                    )
+}
+
+# Selecting only the relevant columns
+  h1b = h1b %>%
+             select(CASE_NUMBER,
+                    CASE_STATUS,
+                    EMPLOYER_NAME,
+                    SOC_NAME,
+                    JOB_TITLE,
+                    FULL_TIME_POSITION,
+                    PREVAILING_WAGE,
+                    WORKSITE_CITY,
+                    WORKSITE_STATE,
+                    YEAR,
+                    lon,
+                    lat)
+
+#Full time position distribution
+#For filling the missing values,  then analyze the relationship of the Prevailing Wage with Full Time Position across the years.
+# Generic ggplot graphics configuration I will be using for all my plots
+  
+```
+
+```{r}
+state_abbs = c("AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
+                                         "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA", "MA", "MD", "ME",
+                                         "MI", "MN", "MO", "MS",  "MT", "NC", "ND", "NE", "NH", "NJ", "NM",
+                                         "NV", "NY", "OH", "OK", "OR", "PA", "PR", "RI", "SC", "SD", "TN",
+                                         "TX", "UT", "VA", "VT", "WA", "WI", "WV", "WY")
+
+state_full = c("alaska","alabama","arkansas","arizona","california","colorado",
+                                       "connecticut","district of columbia","delaware","florida","georgia",
+                                       "hawaii","iowa","idaho","illinois","indiana","kansas","kentucky",
+                                       "louisiana","massachusetts","maryland","maine","michigan","minnesota",
+                                       "missouri","mississippi","montana","north carolina","north dakota",
+                                       "nebraska","new hampshire","new jersey","new mexico","nevada",
+                                       "new york","ohio","oklahoma","oregon","pennsylvania","puerto rico",
+                                       "rhode island","south carolina","south dakota","tennessee","texas",
+                                       "utah","virginia","vermont","washington","wisconsin",
+                                       "west virginia","wyoming")
+ 
+state_hash = hashmap(state_abbs,state_full)
+h1b$WORKSITE_STATE_FULL = sapply(h1b$WORKSITE_STATE, function(x,y) {return(toupper(y[[x]]))}, y = state_hash)
+```
+
+```{r}
+site_merge <- function(x,y) {
+  return(paste0(x,", ",y))
+}
+
+h1b %>%
+  rename(WORKSITE_STATE_ABB = WORKSITE_STATE) -> h1b
+
+h1b$WORKSITE = mapply(site_merge,h1b$WORKSITE_CITY,h1b$WORKSITE_STATE_FULL)
+wrong_names = c("NEW YROK, NEW YORK", "SUUNYVALE, CALIFORNIA", "SAN FRANSISCO, CALIFORNIA")
+
+h1b %>% 
+  filter(WORKSITE %in% wrong_names) %>%
+  group_by(WORKSITE) %>%
+  summarise(count = n())
+h1b %>% 
+  group_by(WORKSITE) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count)) -> sites_count
+
+site_hash = hashmap(sites_count$WORKSITE, sites_count$count)
+```
+
+```{r}
+get_inserts <- function(split_left,split_right, i, letters) {
+  # Generate insertions of a single letter
+  return(unlist(sapply(letters, function(left,right,c) {return(paste0(left, c, right))}, left = split_left[i], right = split_right[i])))
+}
+
+get_deletes <- function(split_left,split_right, i) {
+  # Generate deletion of one letter from word
+  return(paste0(split_left[i], substr(split_right[i],2,nchar(split_right[i]))))
+}
+
+get_replaces <- function(split_left,split_right, i,letters) {
+  # Generate replacement of a letter by a-z or space
+  if(!is.null(split_right[i]) &  nchar(split_right[i]) > 0) {
+      return(unlist(sapply(letters, function(left,right,c) {return(paste0(left, c, right))}, left = split_left[i], right = substr(split_right[i],2,nchar(split_right[i])))))
+  }
+  return(NULL)
+}
+
+get_transposes <- function(split_left, split_right,i) {
+  # Generate interchanging of the positions of adjacent letters
+  if(!is.null(split_right[i]) & nchar(split_right[i]) > 1) {
+    return(paste0(split_left[i],substr(split_right[i],2,2),substr(split_right[i],1,1),substr(split_right[i],3,nchar(split_right[i]))))
+  }
+  return(NULL)
+}
+
+edits1site <- function(site) {
+  # All edits that are one edit away from site
+  letters = toupper(strsplit("abcdefghijklmnopqrstuvwxyz ",split='')[[1]])
+  site_len <- nchar(site)
+  #print(site_len)
+  if(site_len < 4) {
+    return(site)
+  }
+  split_left <- sapply(seq(0,site_len), substr,x = site,start = 1)
+  split_right <- sapply(seq(1,site_len+1), substr,x = site,stop = site_len) 
+  deletes <- sapply(seq(1,site_len+1),get_deletes, split_left = split_left, split_right = split_right)
+  transposes <- unlist(sapply(seq(1,site_len+1),get_transposes, split_left = split_left, split_right = split_right))
+  replaces <- unlist(sapply(seq(1,site_len+1),get_replaces, split_left = split_left, split_right = split_right, letters=letters))
+  inserts <- unlist(sapply(seq(1,site_len+1),get_inserts, split_left = split_left, split_right = split_right,letters = letters))
+  
+  return(unique(c(deletes,transposes,replaces,inserts)))
+}
+
+edits2site <- function(site) { 
+    # All edits that are two edits away from `word`
+    edits1_sites = edits1site(site)
+    return (unlist(sapply(edits1_sites, edits1site)))
+}
+
+get_prob <- function(site, site_hash) {
+  # probability of site in our dataset
+  return(site_hash[[site]])
+}
+
+known <- function(sites,site_hash = site_hash) {
+  # The subset of candidate sites that appear in the dictionary of sites
+  return(sites[site_hash$has_keys(sites)])
+}
+
+find_candidates <- function(site,...) {
+  # Generate possible spelling corrections for word
+  return(c(known(site,...), known(edits1site(site),...), c(site)))
+}
+
+site_spell_correcter <- function(site,...) {
+  # best possible correction to the site
+  candidates = find_candidates(site,...)
+  best_candi = candidates[which.max(sapply(candidates,get_prob, ...))]
+  
+  #if(get_prob(best_candi,...) > get_prob(site,...) ) {
+  #  return(best_candi)
+  #}
+  return(best_candi)
+}
+
+site_count <- function(site, site_hash) {
+  
+  if(site_hash$has_key(site)) {
+    return(site_hash[[site]])
+  }
+  return(site)
+}
+```
+
+```{r}
+sites <- sites_count$WORKSITE
+sites_before <- c()
+sites_after <- c()
+count <- 0
+
+for(site in sites) {
+  # Count of current Worksite
+  curr_count <- site_count(site,site_hash)
+  #print(paste0(site, ", ",curr_count))
+  
+  if(curr_count < 100) { # Threshold
+    #print(paste0(site, ", ",curr_count))
+    corrected <- site_spell_correcter(site,site_hash)
+    
+    if(corrected != site) { # Correction occurred
+      count <- count + 1
+      sites_before[count] <- site
+      sites_after[count] <- corrected
+      corrected_count <- site_count(corrected,site_hash)
+      #print(paste0(site, " : ", curr_count,", ",corrected, " : ", corrected_count))
+    }
+  }  
+}
+
+sites_corrected_hash <- hashmap(sites_before,sites_after)
+worksite_correct <- function(x, hash) {
+  if(hash$has_key(x)) {
+    return(hash[[x]])
+  }
+  return(x)
+}
+
+
+h1b$WORKSITE_CORRECTED <- sapply(h1b$WORKSITE,worksite_correct,hash=sites_corrected_hash)
+h1b %>%
+  select(-WORKSITE) %>%
+  rename(WORKSITE = WORKSITE_CORRECTED) -> h1b
+head(h1b)
+```
+
+```{r}
+h1b %>%
+select(-WORKSITE_STATE_FULL) -> h1b_compact
+saveRDS(h1b_compact,"h1b_transformed.rds")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
