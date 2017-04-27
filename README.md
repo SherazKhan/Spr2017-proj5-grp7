@@ -1,8 +1,8 @@
 # ADS Project 5: "Survival Analysis" - H-1B Deny Analysis Shiny App
 
-Term: Spring 2017
 ![H1B Visa](http://www.spotlifeasia.com/wp-content/uploads/2017/01/Trump-H1b-Visa.png)
 
++ Term: Spring 2017
 + Team # 7
 + Projec title: H1B Deny Analysis Shiny App
 + Dataset: 3 million records of H-1B Visa Petitions
