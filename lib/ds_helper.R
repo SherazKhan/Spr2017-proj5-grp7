@@ -121,6 +121,7 @@ get_theme <- function() {
   return(
     theme(axis.title = element_text(size = rel(1.5)),
           legend.position = "right",
+          legend.key = element_rect(fill = "white", colour = "black"),
           legend.text = element_text(size = rel(1.5)),
           legend.title = element_text(size=rel(1.5)))
   )
@@ -135,3 +136,29 @@ data_science_df <- plot_input(job_filter(h1b,job_list),
                               "YEAR",
                               "TotalApps")
 ds1<-plot_output(data_science_df, "JOB_INPUT_CLASS","YEAR", "TotalApps", "JOB CLASS", "NO. OF APPLICATIONS")
+
+
+ds2<-ggplot(job_filter(h1b,job_list), aes(x=JOB_INPUT_CLASS,y= PREVAILING_WAGE)) +
+  geom_boxplot(aes(fill=YEAR)) + xlab("JOB TITLE") + ylab("WAGE (USD)") +
+  get_theme() + coord_cartesian(ylim=c(25000,200000))
+
+h1b%>%
+  mutate(SOC_NAME = toupper(SOC_NAME)) -> h1b
+
+job_filter(h1b,job_list) %>%
+  filter(!is.na(SOC_NAME)) %>%
+  group_by(SOC_NAME) %>%
+  summarise(TotalApps = n(), Wage = median(PREVAILING_WAGE)) %>%
+  filter(TotalApps > 10) %>% 
+  arrange(desc(Wage))
+
+
+data_science_soc_df <- plot_input(job_filter(h1b,job_list),
+                                  "SOC_NAME",
+                                  "YEAR",
+                                  "TotalApps",
+                                  filter = TRUE,
+                                  Ntop = 10)
+ds3<-plot_output(data_science_soc_df, "SOC_NAME","YEAR", "TotalApps", "INDUSTRY", "NO. OF APPLICATIONS")
+
+ds4<-plot_output(data_science_soc_df, "SOC_NAME","YEAR", "Wage", "INDUSTRY", "WAGE (USD)")
