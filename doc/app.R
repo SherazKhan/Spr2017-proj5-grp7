@@ -1,7 +1,7 @@
 ## APP ##
 
 #### Install Libraries ####
-packages.used <- c("shiny","shinydashboard","plotly","plyr","dplyr","lazyeval","ggplot2")
+packages.used <- c("shiny","shinydashboard","plotly","plyr","dplyr","lazyeval","ggplot2","reshape2")
 
 packages.needed <- setdiff(packages.used, 
                            intersect(installed.packages()[,1], 
@@ -20,6 +20,7 @@ library(plyr)
 library(dplyr)
 library(lazyeval)
 library(ggplot2)
+library(reshape2)
 
 #### Source helper functions ####
 load("../output/cleaned_data.Rdata")
@@ -72,39 +73,103 @@ body <- dashboardBody(
                          plotlyOutput("g1")),
                   
                   column(width = 3,
-                         selectInput("case1",
-                                     label = h3("Case Status"),
-                                     choices=list("ALL" = "ALL",
-                                                  "Certified" = "CERTIFIED",
-                                                  "Denied" = "DENIED",
-                                                  "Certified-Withdrawn" = "CERTIFIED-WITHDRAWN",
-                                                  "Withdrawn" = "WITHDRAWN")),
                          selectInput("state1",
                                      label = h3("State"),
-                                     choices= c("ALL",sort(as.character(unique(h1b$STATE))))
+                                     choices= c("ALL",sort(as.character(unique(h1b$STATE)))),
+                                     selected = "NEW YORK"
                          )
+                         
+                  )
+                ),
+                
+                ## Second Graph
+                tabPanel(
+                  title = "Top Employor",
+                  column(width=10,
+                         plotlyOutput("g2")),
+                  
+                  column(width = 2,
+                         radioButtons("type2", label = h3("Stats Type"),
+                                      choices = list("Total Number"="Total Number",
+                                                     "Percentage Share"="Percentage Share"),
+                                      inline = F),
+                         selectInput("year2",
+                                     label = h3("Year"),
+                                     choices= list("ALL"="ALL",
+                                                   "2011"=2011,
+                                                   "2012"=2012,
+                                                   "2013"=2013,
+                                                   "2014"=2014,
+                                                   "2015"=2015,
+                                                   "2016"=2016)
+                         ),
+                         selectInput("state2",
+                                     label = h3("State"),
+                                     choices= c("ALL",sort(as.character(unique(h1b$STATE)))),
+                                     selected = "NEW YORK"
+                         )
+                         
+                         
+                  )
+                ),
+                
+                ## Third Graph
+                tabPanel(
+                  title = "Top Job Title",
+                  column(width=10,
+                         plotlyOutput("g3")),
+                  
+                  column(width = 2,
+                         radioButtons("type3", label = h3("Stats Type"),
+                                      choices = list("Total Number"="Total Number",
+                                                     "Percentage Share"="Percentage Share"),
+                                      inline = F),
+                         selectInput("year3",
+                                     label = h3("Year"),
+                                     choices= list("ALL"="ALL",
+                                                   "2011"=2011,
+                                                   "2012"=2012,
+                                                   "2013"=2013,
+                                                   "2014"=2014,
+                                                   "2015"=2015,
+                                                   "2016"=2016)
+                         ),
+                         selectInput("state3",
+                                     label = h3("State"),
+                                     choices= c("ALL",sort(as.character(unique(h1b$STATE)))),
+                                     selected = "NEW YORK"
+                         )
+                         
+                         
+                  )
+                ),
+                
+                ## Fourth Graph
+                tabPanel(
+                  title = "Wage",
+                  column(width = 9,
+                         plotlyOutput("g4")),
+                  
+                  column(width = 3,
+                         selectInput("case4",
+                                     label = h3("Case Status"),
+                                     choices= list("ALL"="ALL",
+                                                   "CERTIFIED"="CERTIFIED",
+                                                   "DENIED"="DENIED",
+                                                   "CERTIFIED-WITHDRAWN"="CERTIFIED-WITHDRAWN",
+                                                   "WITHDRAWN"="WITHDRAWN"),
+                                     selected = "CERTIFIED"
+                         ),
+                         selectInput("state4",
+                                     label = h3("State"),
+                                     choices= c("ALL",sort(as.character(unique(h1b$STATE)))),
+                                     selected = "NEW YORK"
+                         )
+                         
                          
                   )
                 )
                 
-                ## Second Graph
-                #tabPanel(
-                #  title = "H1B Trend",
-                #  column(width=9,
-                #         plotlyOutput("g1")),
-                #  
-                #  column(width = 3,
-                #         selectInput("case",
-                #                     label = h3("Case Status"),
-                #                     choices=list("All"= "ALL",
-                #                                  "Certified" = "CERTIFIED",
-                #                                  "Denied" = "DENIED",
-                #                                  "Certified-Withdrawn" = "CERTIFIED-WITHDRAWN",
-                #                                  "Withdrawn" = "WITHDRAWN"))
-                
-                
-                #  )
-                #)
               )
               
               
@@ -184,8 +249,25 @@ server <- function(input,output) {
   
   ## First graph
   output$g1 <- renderPlotly(
-    { g1_generator(input.case = input$case1, input.state =input$state1, h1b) }
+    { g1_generator(input.state =input$state1, h1b) }
   )
+  
+  ## Second Graph
+  output$g2 <- renderPlotly(
+    { g2_generator(input.type = input$type2,input.year = input$year2, input.state =input$state2, h1b) }
+  )
+  
+  ## Third Graph 
+  output$g3 <- renderPlotly(
+    { g3_generator(input.type = input$type3,input.year = input$year3, input.state =input$state3, h1b) }
+  )
+  
+  ## Fourth Graph 
+  output$g4 <- renderPlotly(
+    { g4_generator(input.case = input$case4, input.state =input$state4, h1b) }
+  )
+  
+  
   output$ds1 <- renderPlotly(
     { (ds1) }
   )
