@@ -1,6 +1,6 @@
 # ADS Project 5: "Survival Analysis" - H-1B Deny Analysis Shiny App
 
-![image](figs/H1B Visa.png)
+![image](figs/H1B Visa.jpg)
 
 Term: Spring 2017
 
