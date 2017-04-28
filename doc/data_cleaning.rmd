@@ -6,7 +6,8 @@ output: html_notebook
 
 
 ```{r}
-h1b=read.csv("../data/h1b_kaggle.csv")
+h1b=read.csv("../data/h1b.csv")
+#data is too large to upload  
 
 ## Eliminate records with empty case status
 index1=which(h1b$CASE_STATUS=="CERTIFIED")
@@ -20,10 +21,16 @@ h1b=h1b[index,]
 h1b=h1b[!is.na(h1b$lon),]
 h1b=h1b[!is.na(h1b$lat),]
 
-## Arrange SOC_name 
+## Arrange SOC_NAME 
 h1b$SOC_NAME=as.factor(toupper(h1b$SOC_NAME))
 h1b[which(h1b$SOC_NAME=="COMPUTER OCCUPATIONS, ALL OTHER*"),"SOC_NAME"]="COMPUTER OCCUPATIONS, ALL OTHER"
 h1b[which(h1b$SOC_NAME=="NETWORK AND COMPUTER SYSTEMS ADMINISTRATORS*"),"SOC_NAME"]="NETWORK AND COMPUTER SYSTEMS ADMINISTRATORS"
+
+## Arrange Job_TITLE
+h1b[which(h1b$JOB_TITLE=="TECHNOLOGY LEAD - US"),"JOB_TITLE"]="TECHNOLOGY LEAD"
+h1b[which(h1b$JOB_TITLE=="TECHNOLOGY ANALYST - US"),"JOB_TITLE"]="TECHNOLOGY ANALYST"
+h1b[which(h1b$JOB_TITLE=="SYSTEMS ENGINEER - US"),"JOB_TITLE"]="SYSTEMS ENGINEER"
+
 
 ## Seperate city and states
 h1b$WORKSITE<-as.character(h1b$WORKSITE)
