@@ -1,87 +1,72 @@
+##############################Source for DS panel####################
 
+##packages
+library(lazyeval)
+library(ggplot2)
+library(readr) 
+library(dplyr)
+library(ggrepel)
+library(plotly)
 
-job_filter <- function(df,input_vec) {
-  # Function to filter only the rows from dataframe 
-  # with Job titles provided in the inputs
-  # Inputs:
-  # df         : H-1B dataset dataframe
-  # input_vec  : vector of job types input
-  # Output     : filtered dataframe
-  # If no match, returns an empty data frame
-  # If the inputs are all equal to "", it returns the complete dataframe
-  # A new column JOB_INPUT_CLASS is created to identify the Job Type
-  # If multiple job type inputs match with a single row in the dataframe df, the 
-  # output contains them in different rows each with distinct JOB_INPUT_CLASS
-  
-  # If input_vec is empty, return without any filtering
-  if(length(input_vec) == 0) {
+# Function to filter only the rows from dataframe 
+
+job_filter <- function(data,input_vector) {
+
+  if(length(input_vector) == 0) {
     return(df %>%
              mutate(JOB_INPUT_CLASS = JOB_TITLE))
   }
   
-  new_df <- data.frame()
+  new_data <- data.frame()
   
-  for(value in input_vec){
-    new_df <- rbind(new_df, df %>% 
-                      filter(regexpr(value,JOB_TITLE,ignore.case=TRUE) != -1) %>%
-                      mutate(JOB_INPUT_CLASS = toupper(value)))
+  for(i in input_vector){
+    new_data <- rbind(new_data, data %>% 
+                      filter(regexpr(i,JOB_TITLE,ignore.case=TRUE) != -1) %>%
+                      mutate(JOB_INPUT_CLASS = toupper(i)))
   }
-  return(unique(new_df))
+  return(unique(new_data))
 }
 
 
-find_top <- function(df,x_feature,metric, Ntop = 3) {
+
   # Function to find the top values in x_feature based on metric value
-  # Inputs:
-  # df            : filtered dataframe from job_type, location, employer and year range inputs
-  # x_feature     : the column in df against which the metric is plotted for e.g., EMPLOYER_NAME
-  # metric        : metric for data comparison 
-  # Output        : list of top values in x_feature based on metric
-  arrange_criteria <- interp(~ desc(x), x = as.name(metric))
+top_value <- function(data,x_feature,criterion, Ntop = 3) {
+
+  arrange_criteria <- interp(~ desc(x), x = as.name(criterion))
   
-  df %>% 
+  data %>% 
     group_by_(x_feature) %>% 
     mutate(certified =ifelse(CASE_STATUS == "CERTIFIED",1,0)) %>%
-    # Metrics that I will be using in my data analysis
+    # Metrics to be used in data analysis
     summarise(TotalApps = n(),
               Wage = median(PREVAILING_WAGE), 
               CertiApps = sum(certified),
               Share = CertiApps/850) %>%
-    arrange_(arrange_criteria) -> top_df
+    arrange_(arrange_criteria) -> top_data
   
-  top_len <- min(dim(top_df)[1],Ntop)
+  top_length <- min(dim(top_value)[1],Ntop)
   
-  return(top_df[1:top_len,1])
+  return(top_data[1:top_length,1])
 }
 
 
-plot_input <- function(df, x_feature, fill_feature, metric,filter = FALSE, ...) {
+inputplot <- function(data, x_feature, fill_feature,criterion,filter = FALSE, ...) {
   # Function to transform the filtered dataframe to one with computed metrics
-  # Inputs:
-  # df            : filtered dataframe from job_type, location, employer and year range inputs
-  # x_feature     : the column in df against which the metric is plotted for e.g., EMPLOYER_NAME
-  # fill_feature  : additional level of classification; for e.g., Year
-  # metric        : metric for data comparison 
-  # filter        : logical operator that filters only the rows with x_feature value belonging to top_find() output
-  # Output        : dataframe grouped by x_feature and fill_feature with metrics as columns
+
+  #Finding out the top across the entire range independent of the fill_feature
+  top_x <- unlist(top_value(data,x_feature,criterion, ...))
   
-  #Finding out the top across the entire range independent of the fill_feature e.g. Year
-  top_x <- unlist(find_top(df,x_feature,metric, ...))
-  
-  # lazyeval package interp () generates expression that interprets x_feature and metric arguments
-  # this is fed into filter_ and arrange_ accordingly
-  # Source: https://cran.r-project.org/web/packages/lazyeval/vignettes/lazyeval.html
+
   
   filter_criteria <- interp(~x %in% y, .values = list(x = as.name(x_feature), y = top_x))
-  arrange_criteria <- interp(~ desc(x), x = as.name(metric))
+  arrange_criteria <- interp(~ desc(x), x = as.name(criterion))
   
   if(filter == TRUE) {
-    df %>%
-      filter_(filter_criteria) -> df
+    data %>%
+      filter_(filter_criteria) -> data
   }
-  
-  #Grouping by not just x_feature but also fill_feature
-  return(df %>% 
+
+  return(data %>% 
            group_by_(.dots=c(x_feature,fill_feature)) %>% 
            mutate(certified =ifelse(CASE_STATUS == "CERTIFIED",1,0)) %>%
            # metrics I will be using in my data analysis   
@@ -93,30 +78,7 @@ plot_input <- function(df, x_feature, fill_feature, metric,filter = FALSE, ...) 
 
 
 
-
-plot_output <- function(df, x_feature,fill_feature,metric, xlabb,ylabb) {  
-    # Function to plot output
-    # Inputs:
-    # df            : dataframe output of plot_input()
-    # x_feature     : the column in df against which the metric is plotted for e.g., EMPLOYER_NAME
-    # fill_feature  : additional level of classification; for e.g., Year
-    # metric        : metric for data comparison 
-    # xlabb         : x label
-    # ylabb         : y label
-    # Output        : ggplot object
-    
-    # Prevents numbers on plot transforming into scientific notation
-    options(scipen = 999)
-    
-    g <- ggplot(df, aes_string(x=x_feature,y=metric)) +
-      geom_bar(stat = "identity", aes_string(fill = fill_feature), position = "dodge") + 
-      coord_flip() + xlab(xlabb) + ylab(ylabb) + get_theme()
-    
-    return(g)
-  }
-
-
-get_theme <- function() {
+theme_for_plot <- function() {
   # Function for ggplot2 graphics parameters
   return(
     theme(axis.title = element_text(size = rel(1.5)),
@@ -126,41 +88,48 @@ get_theme <- function() {
           legend.title = element_text(size=rel(1.5)))
   )
 }
+
+
+    # Function to plot output
+outputplot <- function(data, x_feature,fill_feature,criterion, xlab_var,ylab_var) {  
+
+
+    options(scipen = 999)
+    
+    return(ggplot(data, aes_string(x=x_feature,y=criterion)) +
+      geom_bar(stat = "identity", aes_string(fill = fill_feature), position = "dodge") + 
+      coord_flip() + xlab(xlab_var) + ylab(ylab_var) + theme_for_plot()+scale_fill_hue(c=45, l=80))
+
+  }
+
+
+
 h1b %>% 
   mutate(YEAR = as.character(YEAR)) -> h1b
 
-job_list <- c("Data Scientist","Data Engineer","Machine Learning")
+job_list <- c("Data Engineer","Data Scientist","Machine Learning")
 
-data_science_df <- plot_input(job_filter(h1b,job_list),
+data_science <- inputplot(job_filter(h1b,job_list),
                               "JOB_INPUT_CLASS",
                               "YEAR",
                               "TotalApps")
-ds1<-plot_output(data_science_df, "JOB_INPUT_CLASS","YEAR", "TotalApps", "JOB CLASS", "NO. OF APPLICATIONS")
+ds1<-outputplot(data_science, "JOB_INPUT_CLASS","YEAR", "TotalApps", "JOB CLASS", "NO. OF APPLICATIONS")
 
 ds2 <-plot_ly(data = job_filter(h1b,job_list),x=~JOB_INPUT_CLASS,y= ~PREVAILING_WAGE,color = ~YEAR,type = "box") %>%
   layout(boxmode="group",
-         yaxis = list(title="WAGE (USD)",
-                                      range = c(25000,200000)),
-         xaxis = list(title="Job Title"))
+         yaxis = list(title="WAGE ($)", range = c(25000,200000)), xaxis = list(title="Job Title"))
 
 
 h1b%>%
   mutate(SOC_NAME = toupper(SOC_NAME)) -> h1b
 
-job_filter(h1b,job_list) %>%
-  filter(!is.na(SOC_NAME)) %>%
-  group_by(SOC_NAME) %>%
-  summarise(TotalApps = n(), Wage = median(PREVAILING_WAGE)) %>%
-  filter(TotalApps > 10) %>% 
-  arrange(desc(Wage))
 
 
-data_science_soc_df <- plot_input(job_filter(h1b,job_list),
-                                  "SOC_NAME",
-                                  "YEAR",
-                                  "TotalApps",
+
+data_science_1 <- inputplot(job_filter(h1b,job_list), "SOC_NAME", "YEAR", "TotalApps",
                                   filter = TRUE,
                                   Ntop = 10)
-ds3<-plot_output(data_science_soc_df, "SOC_NAME","YEAR", "TotalApps", "INDUSTRY", "NO. OF APPLICATIONS")
+ds3<-outputplot(data_science_1, "SOC_NAME","YEAR", "TotalApps", "INDUSTRY", "NO. OF APPLICATIONS")
 
-ds4<-plot_output(data_science_soc_df, "SOC_NAME","YEAR", "Wage", "INDUSTRY", "WAGE (USD)")
+ds4<-outputplot(data_science_1, "SOC_NAME","YEAR", "Wage", "INDUSTRY", "WAGE(USD)")
+
