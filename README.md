@@ -14,13 +14,14 @@
 	+ Chengcen Zhou, cz2432
 	
 + Project summary: 
-	+ The H-1B is an employment-based, non-immigrant visa category for temporary foreign workers in the United States. For a foreign national to apply for H1-B visa, an US employer must offer a job and petition for H-1B visa with the US immigration department. This is the most common visa status applied for and held by international students once they complete college/higher education (Masters, PhD) and work in the US. The Office of Foreign Labor Certification (OFLC) generates program data that is useful information about the immigration programs including the H1-B visa. The raw data could be downloaded [here](https://www.foreignlaborcert.doleta.gov/performancedata.cfm).
+	+ The H-1B is an employment-based, non-immigrant visa category for temporary foreign workers in the United States. For a foreign national to apply for H1-B visa, an US employer must offer a job and petition for H-1B visa with the US immigration department. This is the most common visa status applied for and held by international students once they complete college/higher education (Masters, PhD) and work in the US. The Office of Foreign Labor Certification (OFLC) generates program data that is useful information about the immigration programs including the H1-B visa. The raw data could be downloaded [here](https://drive.google.com/file/d/0B7g7UviLDlhuVjhaLWVLZW5WS2c/view?usp=sharing).
+	+ See our project at [https://proj5.shinyapps.io/h1b-app2/](https://proj5.shinyapps.io/h1b-app2/). You can also regenerate our app by runing app.R in the app folder.
 	
-	<img src="figs/1.jpeg" alt="alt text">
+       <img src="figs/1.jpeg" alt="alt text">
 	
-       <img src="figs/2.jpeg" alt="alt text" width="600" height="400">
+       <img src="figs/2.jpeg" alt="alt text">
           
-       <img src="figs/3.jpeg" alt="alt text" width="600" height="400">
+       <img src="figs/3.jpeg" alt="alt text">
 	
 **Contribution statement**: ([default](doc/a_note_on_contributions.md)) All team members contributed equally in all stages of this project. All team members approve our work presented in this GitHub repository including this contributions statement. 
 
