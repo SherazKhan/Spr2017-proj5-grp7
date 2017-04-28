@@ -1,0 +1,884 @@
+---
+title: "project 5"
+author: "Chengcen Zhou"
+date: "4/26/2017"
+output: html_document
+runtime: shiny
+---
+
+```{r}
+
+require(readxl)
+require(hashmap)
+require(ggmap)
+require(ggrepel)
+require(dplyr)
+require(ggplot2)
+#Clean Data
+
+#Empty data frame
+h1b_df = data.frame()
+
+h1b=read.csv("/Users/Connie/Desktop/Spr2017-proj5-grp7/data/h1b_kaggle.csv")
+
+
+index1=which(h1b$CASE_STATUS=="CERTIFIED")
+index2=which(h1b$CASE_STATUS=="DENIED")
+index3=which(h1b$CASE_STATUS=="CERTIFIED-WITHDRAWN")
+index4=which(h1b$CASE_STATUS=="WITHDRAWN")
+index=c(index1,index2,index3,index4)
+h1b=h1b[index,]
+
+
+h1b=h1b[!is.na(h1b$lon),]
+h1b=h1b[!is.na(h1b$lat),]
+
+h1b$SOC_NAME=as.factor(toupper(h1b$SOC_NAME))
+h1b[which(h1b$SOC_NAME=="COMPUTER OCCUPATIONS, ALL OTHER*"),"SOC_NAME"]="COMPUTER OCCUPATIONS, ALL OTHER"
+h1b[which(h1b$SOC_NAME=="NETWORK AND COMPUTER SYSTEMS ADMINISTRATORS*"),"SOC_NAME"]="NETWORK AND COMPUTER SYSTEMS ADMINISTRATORS"
+
+h1b$WORKSITE<-as.character(h1b$WORKSITE)
+citystate <-data.frame(matrix(unlist(strsplit(h1b$WORKSITE,", ")),ncol = 2,byrow = T))
+colnames(citystate)=c("WORKSITE_CITY","WORKSITE_STATE")
+h1b=cbind(h1b,citystate)
+ 
+names(h1b)
+
+#Changing column names of data for matching
+#print("Column matching ..")
+
+print("Column matching ..")
+{
+   h1b= h1b %>%
+             mutate(X = CASE_NUMBER,
+                    #CASE_STATUS = CASE_STATUS,
+                    #EMPLOYER_NAME = EMPLOYER_NAME,
+                    #SOC_NAME = SOC_NAME,
+                    #JOB_TITLE = JOB_TITLE,
+                    #FULL_TIME_POSITION = FULL_TIME_POSITION,
+                    #PREVAILING_WAGE = PREVAILING_WAGE,
+                    WORKSITE_CITY = CITY,
+                    WORKSITE_STATE = STATE)
+}
+
+# Adding Year column to dataframe
+  print("Mutating year ..")
+  h1b = h1b %>%
+    mutate(YEAR = as.character(YEAR))
+
+  print(paste0("Mutated data size: ", as.character(dim(h1b_df))))  
+
+# Selecting only the relevant columns
+  h1b = h1b %>%
+             select(CASE_NUMBER,
+                    CASE_STATUS,
+                    EMPLOYER_NAME,
+                    SOC_NAME,
+                    JOB_TITLE,
+                    FULL_TIME_POSITION,
+                    PREVAILING_WAGE,
+                    WORKSITE_CITY,
+                    WORKSITE_STATE,
+                    YEAR)
+
+  
+```
+
+This R Markdown document is made interactive using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately. 
+
+To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+
+## Inputs and Outputs
+
+You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change.  This demonstrates how a standard R plot can be made interactive by wrapping it in the Shiny `renderPlot` function. The `selectInput` and `sliderInput` functions create the input widgets used to drive the plot.
+
+```{r}
+
+
+#Full time position distribution
+h1b %>%
+  group_by(FULL_TIME_POSITION) %>%
+  summarise(count = n(),percentage = 100*count/(dim(h1b)[1]))
+#For filling the missing values,  then analyze the relationship of the Prevailing Wage with Full Time Position across the years.
+# Generic ggplot graphics configuration I will be using for all my plots
+get_theme <- function() {
+  return(theme(axis.title = element_text(size = rel(1.5)),
+          legend.position = "bottom",
+          legend.text = element_text(size = rel(1.5)),
+          legend.title = element_text(size=rel(1.5)),
+          axis.text = element_text(size=rel(1.5))))
+}
+
+# Avoid scientific notation in plot
+options(scipen = 999)
+
+g <- ggplot(data = h1b, aes(x=YEAR, y = PREVAILING_WAGE))
+g <- g + geom_boxplot(aes(fill=FULL_TIME_POSITION)) + coord_cartesian(ylim=c(0,125000))
+g <- g + xlab("YEAR") + ylab("WAGE (USD)") + get_theme()
+g
+
+
+
+
+```
+
+## Embedded Application
+
+It's also possible to embed an entire Shiny application within an R Markdown document using the `shinyAppDir` function. This example embeds a Shiny application located in another directory:
+
+```{r tabsets, echo=FALSE}
+h1b_df = data.frame()
+print("Column matching ..")
+{
+   h1b= h1b %>%
+             mutate(CASE_NUMBER = X,
+                    #CASE_STATUS = CASE_STATUS,
+                    #EMPLOYER_NAME = EMPLOYER_NAME,
+                    #SOC_NAME = SOC_NAME,
+                    #JOB_TITLE = JOB_TITLE,
+                    #FULL_TIME_POSITION = FULL_TIME_POSITION,
+                    #PREVAILING_WAGE = PREVAILING_WAGE,
+                    WORKSITE_CITY = CITY,
+                    WORKSITE_STATE = STATE)
+}
+
+# Adding Year column to dataframe
+  print("Mutating year ..")
+  h1b = h1b %>%
+    mutate(YEAR = as.character(YEAR))
+
+  print(paste0("Mutated data size: ", as.character(dim(h1b_df))))  
+
+# Selecting only the relevant columns
+  h1b = h1b %>%
+             select(CASE_NUMBER,
+                    CASE_STATUS,
+                    EMPLOYER_NAME,
+                    SOC_NAME,
+                    JOB_TITLE,
+                    FULL_TIME_POSITION,
+                    PREVAILING_WAGE,
+                    WORKSITE_CITY,
+                    WORKSITE_STATE,
+                    YEAR)
+
+#Full time position distribution
+h1b %>%
+  group_by(FULL_TIME_POSITION) %>%
+  summarise(count = n(),percentage = 100*count/(dim(h1b)[1]))
+#For filling the missing values,  then analyze the relationship of the Prevailing Wage with Full Time Position across the years.
+# Generic ggplot graphics configuration I will be using for all my plots
+get_theme <- function() {
+  return(theme(axis.title = element_text(size = rel(1.5)),
+          legend.position = "bottom",
+          legend.text = element_text(size = rel(1.5)),
+          legend.title = element_text(size=rel(1.5)),
+          axis.text = element_text(size=rel(1.5))))
+}
+
+# Avoid scientific notation in plot
+options(scipen = 999)
+
+g <- ggplot(data = h1b, aes(x=YEAR, y = PREVAILING_WAGE))
+g <- g + geom_boxplot(aes(fill=FULL_TIME_POSITION)) + coord_cartesian(ylim=c(0,125000))
+g <- g + xlab("YEAR") + ylab("WAGE (USD)") + get_theme()
+
+g
+  
+```
+
+```{r}
+state_abbs = c("AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
+                                         "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA", "MA", "MD", "ME",
+                                         "MI", "MN", "MO", "MS",  "MT", "NC", "ND", "NE", "NH", "NJ", "NM",
+                                         "NV", "NY", "OH", "OK", "OR", "PA", "PR", "RI", "SC", "SD", "TN",
+                                         "TX", "UT", "VA", "VT", "WA", "WI", "WV", "WY")
+
+state_full = c("alaska","alabama","arkansas","arizona","california","colorado",
+                                       "connecticut","district of columbia","delaware","florida","georgia",
+                                       "hawaii","iowa","idaho","illinois","indiana","kansas","kentucky",
+                                       "louisiana","massachusetts","maryland","maine","michigan","minnesota",
+                                       "missouri","mississippi","montana","north carolina","north dakota",
+                                       "nebraska","new hampshire","new jersey","new mexico","nevada",
+                                       "new york","ohio","oklahoma","oregon","pennsylvania","puerto rico",
+                                       "rhode island","south carolina","south dakota","tennessee","texas",
+                                       "utah","virginia","vermont","washington","wisconsin",
+                                       "west virginia","wyoming")
+ 
+state_hash = hashmap(state_abbs,state_full)
+h1b$WORKSITE_STATE_FULL = sapply(h1b$WORKSITE_STATE, function(x,y) {return(toupper(y[[x]]))}, y = state_hash)
+```
+
+```{r}
+site_merge <- function(x,y) {
+  return(paste0(x,", ",y))
+}
+
+h1b %>%
+  rename(WORKSITE_STATE_ABB = WORKSITE_STATE) -> h1b
+
+h1b$WORKSITE = mapply(site_merge,h1b$WORKSITE_CITY,h1b$WORKSITE_STATE_FULL)
+wrong_names = c("NEW YROK, NEW YORK", "SUUNYVALE, CALIFORNIA", "SAN FRANSISCO, CALIFORNIA")
+
+h1b %>% 
+  filter(WORKSITE %in% wrong_names) %>%
+  group_by(WORKSITE) %>%
+  summarise(count = n())
+h1b %>% 
+  group_by(WORKSITE) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count)) -> sites_count
+
+site_hash = hashmap(sites_count$WORKSITE, sites_count$count)
+```
+
+```{r}
+get_inserts <- function(split_left,split_right, i, letters) {
+  # Generate insertions of a single letter
+  return(unlist(sapply(letters, function(left,right,c) {return(paste0(left, c, right))}, left = split_left[i], right = split_right[i])))
+}
+
+get_deletes <- function(split_left,split_right, i) {
+  # Generate deletion of one letter from word
+  return(paste0(split_left[i], substr(split_right[i],2,nchar(split_right[i]))))
+}
+
+get_replaces <- function(split_left,split_right, i,letters) {
+  # Generate replacement of a letter by a-z or space
+  if(!is.null(split_right[i]) &  nchar(split_right[i]) > 0) {
+      return(unlist(sapply(letters, function(left,right,c) {return(paste0(left, c, right))}, left = split_left[i], right = substr(split_right[i],2,nchar(split_right[i])))))
+  }
+  return(NULL)
+}
+
+get_transposes <- function(split_left, split_right,i) {
+  # Generate interchanging of the positions of adjacent letters
+  if(!is.null(split_right[i]) & nchar(split_right[i]) > 1) {
+    return(paste0(split_left[i],substr(split_right[i],2,2),substr(split_right[i],1,1),substr(split_right[i],3,nchar(split_right[i]))))
+  }
+  return(NULL)
+}
+
+edits1site <- function(site) {
+  # All edits that are one edit away from site
+  letters = toupper(strsplit("abcdefghijklmnopqrstuvwxyz ",split='')[[1]])
+  site_len <- nchar(site)
+  #print(site_len)
+  if(site_len < 4) {
+    return(site)
+  }
+  split_left <- sapply(seq(0,site_len), substr,x = site,start = 1)
+  split_right <- sapply(seq(1,site_len+1), substr,x = site,stop = site_len) 
+  deletes <- sapply(seq(1,site_len+1),get_deletes, split_left = split_left, split_right = split_right)
+  transposes <- unlist(sapply(seq(1,site_len+1),get_transposes, split_left = split_left, split_right = split_right))
+  replaces <- unlist(sapply(seq(1,site_len+1),get_replaces, split_left = split_left, split_right = split_right, letters=letters))
+  inserts <- unlist(sapply(seq(1,site_len+1),get_inserts, split_left = split_left, split_right = split_right,letters = letters))
+  
+  return(unique(c(deletes,transposes,replaces,inserts)))
+}
+
+edits2site <- function(site) { 
+    # All edits that are two edits away from `word`
+    edits1_sites = edits1site(site)
+    return (unlist(sapply(edits1_sites, edits1site)))
+}
+
+get_prob <- function(site, site_hash) {
+  # probability of site in our dataset
+  return(site_hash[[site]])
+}
+
+known <- function(sites,site_hash = site_hash) {
+  # The subset of candidate sites that appear in the dictionary of sites
+  return(sites[site_hash$has_keys(sites)])
+}
+
+find_candidates <- function(site,...) {
+  # Generate possible spelling corrections for word
+  return(c(known(site,...), known(edits1site(site),...), c(site)))
+}
+
+site_spell_correcter <- function(site,...) {
+  # best possible correction to the site
+  candidates = find_candidates(site,...)
+  best_candi = candidates[which.max(sapply(candidates,get_prob, ...))]
+  
+  #if(get_prob(best_candi,...) > get_prob(site,...) ) {
+  #  return(best_candi)
+  #}
+  return(best_candi)
+}
+
+site_count <- function(site, site_hash) {
+  
+  if(site_hash$has_key(site)) {
+    return(site_hash[[site]])
+  }
+  return(site)
+}
+```
+
+```{r}
+sites <- sites_count$WORKSITE
+sites_before <- c()
+sites_after <- c()
+count <- 0
+
+for(site in sites) {
+  # Count of current Worksite
+  curr_count <- site_count(site,site_hash)
+  #print(paste0(site, ", ",curr_count))
+  
+  if(curr_count < 100) { # Threshold
+    #print(paste0(site, ", ",curr_count))
+    corrected <- site_spell_correcter(site,site_hash)
+    
+    if(corrected != site) { # Correction occurred
+      count <- count + 1
+      sites_before[count] <- site
+      sites_after[count] <- corrected
+      corrected_count <- site_count(corrected,site_hash)
+      #print(paste0(site, " : ", curr_count,", ",corrected, " : ", corrected_count))
+    }
+  }  
+}
+
+sites_corrected_hash <- hashmap(sites_before,sites_after)
+if(hash$has_key(x)) {
+    return(hash[[x]])
+  }
+  return(x)
+
+
+h1b$WORKSITE_CORRECTED <- sapply(h1b$WORKSITE,worksite_correct,hash=sites_corrected_hash)
+h1b %>%
+  select(-WORKSITE) %>%
+  rename(WORKSITE = WORKSITE_CORRECTED) -> h1b
+```
+
+```{r}
+
+library(ggmap)
+
+top_sites <- (sites_count$WORKSITE)[1:2500]
+
+site_geocodes <- cbind(geocode(top_sites),top_sites)
+site_geocodes %>%
+  rename(WORKSITE = top_sites) -> site_geocodes
+
+saveRDS(site_geocodes,"geocodes.RDS")
+N_sites_geocoded <- dim(site_geocodes)[1]
+
+share <- 100*sum((sites_count$count)[1:N_sites_geocoded])/(dim(h1b)[1])
+
+print(paste0("Records captured by geocoded sites: ", share))
+h1b <- full_join(h1b,site_geocodes,by="WORKSITE")
+
+head(h1b)
+```
+
+```{r}
+
+###### helper.r #####
+job_filter <- function(df,input_vec) {
+ 
+  # If input_vec is empty, return without any filtering
+  if(length(input_vec) == 0) {
+    return(df %>%
+             mutate(JOB_INPUT_CLASS = JOB_TITLE))
+  }
+  
+  new_df <- data.frame()
+  
+  for(value in input_vec){
+    new_df <- rbind(new_df, df %>% 
+                      filter(regexpr(value,JOB_TITLE,ignore.case=TRUE) != -1) %>%
+                      mutate(JOB_INPUT_CLASS = toupper(value)))
+  }
+  return(unique(new_df))
+}
+
+
+employer_filter <- function(df, input_vec) {
+
+  if(length(input_vec) == 0) {
+    return(df)
+  }
+  
+  new_df <- data.frame()
+  
+  for(value in input_vec){
+    new_df <- rbind(new_df, df %>% 
+                      filter(regexpr(value,EMPLOYER_NAME,ignore.case=TRUE) != -1))
+  }
+  return(unique(new_df))
+}
+  
+find_top <- function(df,x_feature,metric, Ntop = 3) {
+
+  arrange_criteria <- interp(~ desc(x), x = as.name(metric))
+  
+  df %>% 
+    group_by_(x_feature) %>% 
+    mutate(certified =ifelse(CASE_STATUS == "CERTIFIED",1,0)) %>%
+    summarise(TotalApps = n(),
+              Wage = median(PREVAILING_WAGE), 
+              CertiApps = sum(certified)) %>%
+    arrange_(arrange_criteria) -> top_df
+  
+  top_len <- min(dim(top_df)[1],Ntop)
+  
+  return(top_df[1:top_len,1])
+}
+
+plot_input <- function(df, x_feature, fill_feature, metric,filter = FALSE, ...) {
+
+  #Finding out the top across the entire range independent of the fill_feature e.g. Year
+  top_x <- unlist(find_top(df,x_feature,metric, ...))
+
+  
+  filter_criteria <- interp(~x %in% y, .values = list(x = as.name(x_feature), y = top_x))
+  arrange_criteria <- interp(~ desc(x), x = as.name(metric))
+
+  if(filter == TRUE) {
+    df %>%
+      filter_(filter_criteria) -> df
+  }
+  
+  #Grouping by not just x_feature but also fill_feature
+  return(df %>% 
+    group_by_(.dots=c(x_feature,fill_feature)) %>% 
+    mutate(certified =ifelse(CASE_STATUS == "CERTIFIED",1,0)) %>%
+      summarise(TotalApps = n(),CertiApps = sum(certified), Wage = median(PREVAILING_WAGE)))
+}
+  
+plot_output <- function(df, x_feature,fill_feature,metric, xlabb,ylabb) {  
+  
+  # Prevents numbers on plot transforming into scientific notation
+  options(scipen = 999)
+  
+  g <- ggplot(df, aes_string(x=x_feature,y=metric)) +
+    geom_bar(stat = "identity", aes_string(fill = fill_feature), position = "dodge") + 
+    coord_flip() + xlab(xlabb) + ylab(ylabb) + get_theme()
+  
+  return(g)
+}
+
+
+map_gen <- function(df,metric,USA,...) {
+
+  # Creating Map Dataframe
+  df %>%
+    mutate(certified =ifelse(CASE_STATUS == "CERTIFIED",1,0)) %>%
+    group_by(WORKSITE,lat,lon) %>%
+    summarise(TotalApps = n(),CertiApps = sum(certified), Wage = median(PREVAILING_WAGE)) -> map_df
+   
+
+  # Finding top Locations for metric
+  top_locations <- unlist(find_top(df,"WORKSITE",metric, ...))
+  
+  # First layer    : USA Map
+  # Second layer   : geom_point() with point alpha and size varying with metric
+  # Third layer    : points mapping to top locations using ggrepel package
+  g <- ggplot(USA, aes(x=long, y=lat)) + 
+    geom_polygon() + xlab("Longitude (deg)") + ylab("Latitude(deg)") + 
+    geom_point(data=map_df, aes_string(x="lon", y="lat", label = "WORKSITE", alpha = metric, size = metric), color="yellow") + 
+    geom_label_repel(data=map_df %>% filter(WORKSITE %in% top_locations),aes_string(x="lon", y="lat",label = "WORKSITE"),
+                     fontface = 'bold', color = 'black',
+                     box.padding = unit(0.0, "lines"),
+                     point.padding = unit(1.0, "lines"),
+                     segment.color = 'grey50',
+                     force = 3) +
+  
+    # Using the whole USA map
+    coord_map(ylim = c(23,50),xlim=c(-130,-65)) +
+    get_theme()
+  
+  return(g)
+}
+
+get_theme <- function() {
+  # Function for ggplot2 graphics parameters
+  return(
+    theme(axis.title = element_text(size = rel(1.5)),
+          legend.position = "right",
+          legend.text = element_text(size = rel(1.5)),
+          legend.title = element_text(size=rel(1.5)),
+          axis.text = element_text(size=rel(1.5))) 
+  )
+}
+
+```
+
+
+```{r}
+###### server.r ####
+library(shiny)
+library(ggplot2)
+library(dplyr)
+library(lazyeval)
+library(hashmap)
+library(ggrepel)
+library(maps)
+library(stats)
+library(rdrop2)
+library(mapproj)
+
+
+#Helper functions
+source("helpers.R")
+
+# Initializing value containers used for plotting
+metric_lab_hash <- hashmap(c("TotalApps","CertiApps","Wage"),c("TOTAL H-1B VISA APPLICATIONS", "CERTIFIED H-1B VISA APPLICATIONS","MEDIAN PREVAILING WAGE"))
+USA = map_data(map = "usa")
+
+# Define Server logic
+shinyServer(function(input, output) {
+  
+  #h1b_df <- readRDS("./data/h1b_shiny.rds")
+  
+  ## Initializing Reactive values for inputs
+  reactive_inputs <- reactiveValues(job_list = c('data scientist','data engineer','machine learning'),
+                                    employer_list = c(), 
+                                    year = as.character(seq(2011,2016)), 
+                                    metric = "TotalApps",
+                                    location = "USA",
+                                    Ntop = 3)
+  
+  # Compute button triggers update of reactive inputs
+  observeEvent(input$compute,{
+    job_list <-tolower(trimws(c(input$job_type_1,input$job_type_2,input$job_type_3)))
+    reactive_inputs$job_list <- job_list[job_list != ""]
+    
+    employer_list <-tolower(trimws(c(input$employer_1,input$employer_2,input$employer_3)))
+    reactive_inputs$employer_list <- employer_list[employer_list != ""]
+    
+    reactive_inputs$year <- as.character(seq(input$year[1], input$year[2]))
+    
+    reactive_inputs$metric <- input$metric
+    
+    reactive_inputs$location <- input$location
+    
+    reactive_inputs$Ntop <- input$Ntop
+  })
+  
+  ## Filtering based on input dimensions: year range, location, job type, employer
+
+  # Filter year input
+  year_input <- reactive({
+    df %>%
+      filter(YEAR %in% reactive_inputs$year)
+  })
+
+  # Filter location input
+  location_input <- reactive({
+    if(reactive_inputs$location == 'USA') year_input() else year_input() %>% filter(WORKSITE_STATE_FULL == reactive_inputs$location)
+  })
+
+
+  # Filtering based on job type
+  # If no match found, then use all unique Job Titles
+  job_input <- reactive({
+    job_filter(location_input(),reactive_inputs$job_list)
+  })
+
+  # Filtering based on employer names
+  # If no match found, then use all Employers
+  employer_input <- reactive({
+    #If job types had no match, use the input before job type filtering for employer filtering
+    if(dim(job_input())[1] == 0) {
+      employer_filter(location_input(),reactive_inputs$employer_list)
+    } else {
+      employer_filter(job_input(),reactive_inputs$employer_list)
+    }
+  })
+
+  # Final input data frame for plotting
+  data_input <- reactive({
+    # If both Job type filter and Employer filter then use only Location and Year filter
+    # If job type filter had a match and Employer filter had no match then use up to Job Filter
+    # If Employer had match then use up to Employer filter
+
+    if(dim(employer_input())[1] == 0 & dim(job_input())[1] == 0) {
+      location_input() %>%
+        mutate(JOB_INPUT_CLASS = JOB_TITLE)
+    } else if (dim(employer_input())[1] == 0 & dim(job_input())[1] > 0){
+      job_input()
+    } else if (dim(employer_input())[1] > 0 & dim(job_input())[1] == 0){
+      employer_input() %>%
+        mutate(JOB_INPUT_CLASS = JOB_TITLE)
+    } else {
+      employer_input()
+    }
+  })
+
+  output$dataInput <- renderDataTable({
+    head(data_input())
+  })
+
+  # output$metricInput <- renderText({
+  #   reactive_inputs$metric
+  # })
+
+  ## Plotting
+
+  ## Job Type Comparison Plot
+
+  # Job Type Input
+  job_plot_input <- reactive({
+     plot_input(data_input(),"JOB_INPUT_CLASS", "YEAR",reactive_inputs$metric,filter = TRUE, Ntop = reactive_inputs$Ntop)
+   })
+
+  # Job Type data subset
+  output$job_type_table <- renderDataTable({
+    job_plot_input()
+  }, options = list(lengthMenu = c(10, 20,50), pageLength = 10)
+  )
+
+  # Job Type Plot
+  output$job_type <- renderPlot({
+    plot_output(job_plot_input(),"JOB_INPUT_CLASS", "YEAR", reactive_inputs$metric, "JOB TYPE",
+                metric_lab_hash[[reactive_inputs$metric]])
+  })
+
+
+  ## Locations Input
+
+  # Location Input
+  location_plot_input <- reactive({
+    plot_input(data_input(),"WORKSITE", "YEAR",reactive_inputs$metric, filter = TRUE, Ntop = reactive_inputs$Ntop)
+  })
+
+  # Location data subset
+  output$location_table <- renderDataTable({
+    location_plot_input()
+  }, options = list(lengthMenu = c(10, 20,50), pageLength = 10)
+  )
+
+  # Locations Plot
+  output$location <- renderPlot({
+    plot_output(location_plot_input(),"WORKSITE", "YEAR", reactive_inputs$metric,"LOCATION",
+                metric_lab_hash[[reactive_inputs$metric]])
+  })
+
+   ## Employers Input
+
+   # Employers input
+   employer_plot_input <- reactive({
+     plot_input(data_input(),"EMPLOYER_NAME", "YEAR",reactive_inputs$metric, filter = TRUE, Ntop = reactive_inputs$Ntop)
+   })
+
+   # Employers data subset
+   output$employertable <- renderDataTable({
+     employer_plot_input()
+   }, options = list(lengthMenu = c(10, 20,50), pageLength = 10)
+   )
+
+   # Employer Plot
+   output$employer <- renderPlot({
+     plot_output(employer_plot_input(),"EMPLOYER_NAME", "YEAR",reactive_inputs$metric, "EMPLOYER",
+                 metric_lab_hash[[reactive_inputs$metric]])
+   })
+
+   # Map Output
+   # plotting map for input metric
+   # Map pinpoints to top "Ntop" worksite cities based on the input metric
+   output$map <- renderPlot({
+     map_gen(data_input(),reactive_inputs$metric,USA, Ntop = reactive_inputs$Ntop)
+   })
+
+   output$map_table <- renderDataTable({
+     data_input() %>%
+       mutate(certified =ifelse(CASE_STATUS == "CERTIFIED",1,0)) %>%
+       group_by(WORKSITE) %>%
+       summarise(TotalApps = n(),CertiApps = sum(certified), Wage = median(PREVAILING_WAGE))
+   }, options = list(lengthMenu = c(10, 20,50), pageLength = 10))
+   
+   observeEvent(input$resetAll, {
+     reset("inputs")
+   })
+   
+   # session$onSessionEnded(function() {
+   #   q()
+   # })
+   
+})
+```
+
+
+```{r}
+
+###### ui.r ######
+library(shiny)
+library(shinythemes)
+library(shinyjs)
+
+# List of choices for States input
+# Entire USA or particular state
+states = toupper(c("usa","alaska","alabama","arkansas","arizona","california","colorado",
+  "connecticut","district of columbia","delaware","florida","georgia",
+  "hawaii","iowa","idaho","illinois","indiana","kansas","kentucky",
+  "louisiana","massachusetts","maryland","maine","michigan","minnesota",
+  "missouri","mississippi","montana","north carolina","north dakota",
+  "nebraska","new hampshire","new jersey","new mexico","nevada",
+  "new york","ohio","oklahoma","oregon","pennsylvania","puerto rico",
+  "rhode island","south carolina","south dakota","tennessee","texas",
+  "utah","virginia","vermont","washington","wisconsin",
+  "west virginia","wyoming"))
+state_list <- as.list(states)
+names(state_list) <- states
+
+# Define UI for application that draws a histogram
+shinyUI(
+  
+  fluidPage(
+      
+  useShinyjs(),  
+  #shinythemes::themeSelector(),  
+  theme = shinythemes::shinytheme("slate"),
+  
+  # Application title
+  titlePanel("H-1B Visa Petitions Data Exploration"),
+
+  # Sidebar with a slider input for number of bins 
+  sidebarLayout(
+    sidebarPanel(
+      
+      # CSS style for loading message whenever
+      # Shiny is busy
+      tags$head(tags$style(type="text/css", "
+             #loadmessage {
+                           position: fixed;
+                           top: 0px;
+                           left: 0px;
+                           width: 100%;
+                           padding: 5px 0px 5px 0px;
+                           text-align: center;
+                           font-weight: bold;
+                           font-size: 100%;
+                           color: #000000;
+                           background-color: #CCFF66;
+                           z-index: 105;
+                           }
+                           ")),
+      
+
+      div(
+      
+         id ="inputs",  
+       
+         # Compute button triggers server to update the outputs
+         p(actionButton("resetAll", "Reset All Inputs"),
+           actionButton("compute","Compute!", icon = icon("bar-chart-o"))),
+         
+         # Year range determines the period for data analysis
+         sliderInput("year",
+                     h3("Year"),
+                     min = 2011,
+                     max = 2016,
+                     value = c(2011,2016),
+                     ticks= FALSE),
+         
+         br(),
+
+         h3("Job Type"),
+         h6("Type up to three job type inputs. If no match found in records for all inputs, all Job Titles will be used."),
+         
+         div(
+           id = "job_type",
+           
+           # Default inputs selected from my personal interest
+           textInput("job_type_1", "Job Type 1","Data Scientist"),
+           textInput("job_type_2", "Job Type 2","Data Engineer"),
+           textInput("job_type_3", "Job Type 3", "Machine Learning")
+         ),
+         
+         # Entire USA or a particular state in USA
+         selectInput("location",
+                     h3("Location"),
+                     choices = state_list),
+         
+         h3("Employer Name"),
+         h6("Type up to three Employer inputs for e.g., Google, Amazon etc. If no match found in records for all inputs, all Employers will be used."),
+         div(
+           id = "employer",
+           textInput("employer_1", "Employer 1",""),
+           textInput("employer_2", "Employer 2",""),
+           textInput("employer_3", "Employer 3", "")
+         ),
+         
+
+         selectInput("metric",
+                     h3("Metric"),
+                     choices = list("Total Visa Applications" = "TotalApps",
+                                    "Wage" = "Wage",
+                                    "Certified Visa Applications" = "CertiApps"
+                                   )
+         ),
+         
+         # No. of categories to be compared in each plot including the map plot
+         sliderInput("Ntop",
+                     h3("Plot Categories"),
+                     min = 3,
+                     max = 15,
+                     value = 3)
+         
+       ),
+      conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                       tags$div("Loading...",id="loadmessage"))
+    ),
+    
+    # Show a plot of the generated distribution
+    mainPanel(
+      tabsetPanel(
+        
+        tabPanel("About",
+
+                 tags$img(src = "http://fm.cnbc.com/applications/cnbc.com/resources/img/editorial/2014/02/28/101456986-184650923.530x298.jpg?v=1393621130",
+                          alt = "H-1B Visa", align = "middle",width = "600px", height = "250px"),
+
+                 br(),
+
+                 br(),
+
+
+                 tags$ul(
+                   tags$li(tags$div("Year:", style="color:#5DADE2"), "Slider input of time period. When a single value is chosen, only that year is considered for data analysis."),
+                   tags$li(tags$div("Job Type: ", style="color:#5DADE2"), "Default inputs are Data Scientist, Data Engineer and Machine Learning.
+                           These are selected based on my personal interest. Explore different job titles for e.g. Product Manager, Hardware Engineer.
+                           Type up to three job type inputs in the flexible text input. I avoided a drop-down menu as there are thousands of
+                           unique Job Titles in the dataset. If no match found in records for all the inputs, all Job Titles in the data subset based on other inputs
+                           will be used."),
+                   tags$li(tags$div("Location:", style="color:#5DADE2"), "The granularity of the location parameter is State with the default option being the whole of United States"),
+                   tags$li(tags$div("Employer Name:", style="color:#5DADE2"), "The default inputs are left blank as that might be the most common use case. Explore data for specific employers for e.g., Google, Amazon etc.
+                           Pretty much similar in action to Job Type input."),
+                   tags$li(tags$div("Metric:", style="color:#5DADE2"), "The three input metric choices are Total number of H-1B Visa applications, Certified number of Visa 
+                           Applications and median annual Wage. Certified applications are filed with USCIS for H-1B approval. For more details, read this", tags$a(href="https://www.kaggle.com/nsharan/h-1b-visa/discussion/30691","discussion on Kaggle.", target= "_blank")),
+                   tags$li(tags$div("Plot Categories:", style="color:#5DADE2"), "Additional control parameter for upper limit on the number of categories
+                           to be used for data visualization.")
+                 )
+
+               
+        ),
+
+        tabPanel("Map",
+                 plotOutput("map"),
+                 br(),
+                 dataTableOutput("map_table"))
+
+        
+      )
+       
+    )
+  )
+))
+
+```
+Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
+
+You can also use the `shinyApp` function to define an application inline rather then in an external directory.
+
+In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
+
+
+
