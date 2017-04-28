@@ -24,13 +24,13 @@
        <img src="figs/3.jpeg" alt="alt text">
 	
 **Contribution statement**:  
-Vanessa Huang cleaned dataset. 
+Vanessa Huang cleaned dataset and Siyuan Yao made more advancement on clean data.
 Yifei Lin designed Project Overview penal. 
 Yifei Lin and Vanessa Huang designed Interactive Map penal and Statistical Analysis penal. 
 Yuxi Zhou designed Data Science Related Job Analysis penal and wrote Brief Summary.pdf. 
 Vanessa Huang published the app.
 Yifei Lin carries out presentation.
-Vanessa Huang and Chengcen Zhou updated ReadMe file.
+Vanessa Huang，Chengcen Zhou and Siyuan Yao updated ReadMe file.
 
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
