@@ -6,12 +6,11 @@ library(plotly)
 
 
 ## First Graph: H1B Trending 
-g1_generator <- function(input.state, dataset) {
-  
-  df <- dataset
+g1_generator <- function(input.state, df) {
+
   df$CASE_STATUS <- as.character(df$CASE_STATUS)
   df$STATE <- as.character(df$STATE)
-  df <- df[df$STATE != "NA",]
+
   
   ## STATE
   if (input.state != "ALL") {
@@ -30,12 +29,12 @@ g1_generator <- function(input.state, dataset) {
 }
 
 ## Second Graph: Top Employor
-g2_generator <- function(input.type, input.year, input.state, dataset) {
+g2_generator <- function(input.type, input.year, input.state, df) {
   
-  df <- dataset
+
   df$EMPLOYER_NAME<- as.character(df$EMPLOYER_NAME)
   df$STATE <- as.character(df$STATE)
-  df <- df[!is.na(df$STATE),]
+
   ## input.year
   if (input.year != "ALL") {
     df <- filter(df, YEAR==input.year)
@@ -79,12 +78,12 @@ g2_generator <- function(input.type, input.year, input.state, dataset) {
 }
 
 ## Third Graph: Top Job Titles
-g3_generator <- function(input.type, input.year, input.state, dataset) {
+g3_generator <- function(input.type, input.year, input.state, df) {
   
-  df <- dataset
+  
   df$JOB_TITLE<- as.character(df$JOB_TITLE)
   df$STATE <- as.character(df$STATE)
-  df <- df[!is.na(df$STATE),]
+
   
   ## input.year
   if (input.year != "ALL") {
@@ -130,13 +129,11 @@ g3_generator <- function(input.type, input.year, input.state, dataset) {
 }
 
 ## Fourth Graph: Wage
-g4_generator <- function(input.case, input.state, dataset) {
+g4_generator <- function(input.case, input.state, df) {
   
-  df <- dataset[!is.na(dataset$PREVAILING_WAGE),]
   df$YEAR <- as.character(df$YEAR)
   df$PREVAILING_WAGE <- as.numeric(df$PREVAILING_WAGE)
   df$STATE <- as.character(df$STATE)
-  df <- df[!is.na(df$STATE),]
   
   ## input.case
   if (input.case != "ALL") {
@@ -154,8 +151,8 @@ g4_generator <- function(input.case, input.state, dataset) {
 
 
 ## Map
-map_generator <- function(input.year,input.job,dataset) {
-  df <- dataset
+map_generator <- function(input.year,input.job,df) {
+  
   df$YEAR <- as.numeric(df$YEAR)
   
   ## input.year

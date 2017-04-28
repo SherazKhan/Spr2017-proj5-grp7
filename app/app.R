@@ -2,7 +2,6 @@
 
 #### Install Libraries ####
 packages.used <- c("shiny","shinydashboard","plotly","plyr","Rcpp","dplyr","lazyeval","ggplot2","reshape2","cellranger","hashmap","readxl","rematch","leaflet")
-
 packages.needed <- setdiff(packages.used, 
                            intersect(installed.packages()[,1], 
                                      packages.used))
@@ -16,7 +15,6 @@ if(length(packages.needed)>0){
 library(shiny)
 library(shinydashboard)
 library(plotly)
-library(Rcpp)
 library(plyr)
 library(dplyr)
 library(lazyeval)
@@ -28,13 +26,11 @@ library(hashmap)
 library(readxl)
 library(rematch)
 
-
 #### Source helper functions ####
 load("./data/cleaned_data.Rdata",envir=.GlobalEnv)
 source("./lib/graph_helper.R")
 source("./lib/ds_helper.R")
-h1b$STATE<-as.character(h1b$STATE)
-h1b <- h1b[h1b$STATE!="NA",]
+
 
 #### Header of the Dashboard ####
 header <- dashboardHeader(
@@ -45,10 +41,10 @@ header <- dashboardHeader(
 #### Sidebar ####
 sidebar <- dashboardSidebar(
   sidebarMenu(
-    menuItem("APP Overview",tabName = "Overview"),
-    menuItem("Map",tabName = "Map"),
-    menuItem("Graph",tabName = "Graph"),
-    menuItem("DS",tabName = "DS")
+    menuItem("Project Overview",tabName = "Overview"),
+    menuItem("Interactive Map",tabName = "Map"),
+    menuItem("Statistical Analysis",tabName = "Graph"),
+    menuItem("Data Science Related Job Analysis",tabName = "DS")
   )
 )
 
@@ -58,25 +54,25 @@ body <- dashboardBody(
   tabItems(
     tabItem(tabName = "Overview",
             mainPanel(width = 15,
-              h2(strong("Project Overview")),
-              p("In this project, we will utilize the H1B visa petition dataset and perform various statistical analysis aiming to find interesting trend. The key components of this app are the following: "),
-              p("--", em("Interactive Map ")),
-              p("--", em("Overall H1B Visa Petition Trend")),
-              p("--", em("High-Applicant Employers and Job Title")),
-              p("--", em("Data Science Related Job Analysis")),
-              hr(),
-              h2("H1B"),
-              p("H-1B is an employment-based, non-immigrant visa category for temporary foreign workers in the United States. For a foreign national to apply for H1-B visa, an US employer must offer a job and petition for H-1B visa with the US immigration department."),
-              hr(),
-              h2("H1B Process"),
-              p(strong("Step 1:"), "The first step of the H1B application process is for the U.S. employer to file the H1B petition on behalf of the foreign worker. Be sure the employment letter includes the position's exact duties, dates of employment,  detailed description, salary offered, position requirements, contact information, etc."),
-              p(strong("Step 2:"), "The prevailing and actual wages should be confirmed by the State Employment Security Agency. If the prevailing wage exceeds the offer made by the prospective employer then a wage determination will be sought. It's important to ensure that the foreign worker will not be working below the min. prevailing wage in the specific location. The Foreign Labor Certification Data Center maintains the prevailing wage determinations by location."),
-              p(strong("Step 3:"), "The third step of the H1B application process is to file the Labor Condition Application (ETA-9035)."),
-              p(strong("Step 4:"), "The next step is to prepare the petition and file it at the proper USCIS office"),
-              p(strong("Step 5:"), "Processing times for H1B application petitions are subject to vary from location to location. If you would like your petition expedited you may elect for premium processing. There is an additional charge for this service and it does not necessarily guarantee an approval."),
-              p(strong("Step 6:"), "The final step of the H1B application process is to check the status of your H1B visa petition by entering your receipt number. Once USCIS has your application on file, they will update your status on their system.")
-              
-              )),
+                      h2(strong("Project Overview")),
+                      p("In this project, we will utilize the H1B visa petition dataset and perform various statistical analysis aiming to find interesting trend. The key components of this app are the following: "),
+                      p("--", em("Interactive Map ")),
+                      p("--", em("Overall H1B Visa Petition Trend")),
+                      p("--", em("High-Applicant Employers and Job Title")),
+                      p("--", em("Data Science Related Job Analysis")),
+                      hr(),
+                      h2("H1B"),
+                      p("H-1B is an employment-based, non-immigrant visa category for temporary foreign workers in the United States. For a foreign national to apply for H1-B visa, an US employer must offer a job and petition for H-1B visa with the US immigration department."),
+                      hr(),
+                      h2("H1B Process"),
+                      p(strong("Step 1:"), "The first step of the H1B application process is for the U.S. employer to file the H1B petition on behalf of the foreign worker. Be sure the employment letter includes the position's exact duties, dates of employment,  detailed description, salary offered, position requirements, contact information, etc."),
+                      p(strong("Step 2:"), "The prevailing and actual wages should be confirmed by the State Employment Security Agency. If the prevailing wage exceeds the offer made by the prospective employer then a wage determination will be sought. It's important to ensure that the foreign worker will not be working below the min. prevailing wage in the specific location. The Foreign Labor Certification Data Center maintains the prevailing wage determinations by location."),
+                      p(strong("Step 3:"), "The third step of the H1B application process is to file the Labor Condition Application (ETA-9035)."),
+                      p(strong("Step 4:"), "The next step is to prepare the petition and file it at the proper USCIS office"),
+                      p(strong("Step 5:"), "Processing times for H1B application petitions are subject to vary from location to location. If you would like your petition expedited you may elect for premium processing. There is an additional charge for this service and it does not necessarily guarantee an approval."),
+                      p(strong("Step 6:"), "The final step of the H1B application process is to check the status of your H1B visa petition by entering your receipt number. Once USCIS has your application on file, they will update your status on their system.")
+                      
+            )),
     
     tabItem(tabName = "Map",
             fluidRow(
@@ -94,13 +90,14 @@ body <- dashboardBody(
                   column(width = 3,
                          selectInput("year0",
                                      label = h3("Year"),
-                                     choices= list("ALL"="ALL",
+                                     choices= list(
                                                    "2011"=2011,
                                                    "2012"=2012,
                                                    "2013"=2013,
                                                    "2014"=2014,
                                                    "2015"=2015,
-                                                   "2016"=2016)
+                                                   "2016"=2016,
+                                                   "ALL"="ALL")
                          ),
                          selectInput("job0",
                                      label = h3("Job Title"),
@@ -150,13 +147,14 @@ body <- dashboardBody(
                                       inline = F),
                          selectInput("year2",
                                      label = h3("Year"),
-                                     choices= list("ALL"="ALL",
+                                     choices= list(
                                                    "2011"=2011,
                                                    "2012"=2012,
                                                    "2013"=2013,
                                                    "2014"=2014,
                                                    "2015"=2015,
-                                                   "2016"=2016)
+                                                   "2016"=2016,
+                                                   "ALL"="ALL")
                          ),
                          selectInput("state2",
                                      label = h3("State"),
@@ -181,13 +179,14 @@ body <- dashboardBody(
                                       inline = F),
                          selectInput("year3",
                                      label = h3("Year"),
-                                     choices= list("ALL"="ALL",
+                                     choices= list(
                                                    "2011"=2011,
                                                    "2012"=2012,
                                                    "2013"=2013,
                                                    "2014"=2014,
                                                    "2015"=2015,
-                                                   "2016"=2016)
+                                                   "2016"=2016,
+                                                   "ALL"="ALL")
                          ),
                          selectInput("state3",
                                      label = h3("State"),
@@ -213,14 +212,13 @@ body <- dashboardBody(
                                                    "DENIED"="DENIED",
                                                    "CERTIFIED-WITHDRAWN"="CERTIFIED-WITHDRAWN",
                                                    "WITHDRAWN"="WITHDRAWN"),
-                                     selected = "CERTIFIED"
+                                     selected = "DENIED"
                          ),
                          selectInput("state4",
                                      label = h3("State"),
                                      choices= c("ALL",sort(as.character(unique(h1b$STATE)))),
                                      selected = "NEW YORK"
-                         ),
-                         div("Note: Data only contains 0 - 90 percentile of wage")
+                         )
                          
                          
                   )
@@ -307,8 +305,6 @@ server <- function(input,output) {
   output$map <- renderLeaflet({
     map_generator(input.year = input$year0, input.job = input$job0, h1b)
   })
-  
-  
   
   ## First graph
   output$g1 <- renderPlotly(

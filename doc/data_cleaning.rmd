@@ -38,6 +38,13 @@ citystate <-data.frame(matrix(unlist(strsplit(h1b$WORKSITE,", ")),ncol = 2,byrow
 colnames(citystate)=c("CITY","STATE")
 h1b=cbind(h1b,citystate)
 
+## Delete NA in state
+h1b$STATE<-as.character(h1b$STATE)
+h1b=h1b[h1b$STATE!="NA",]
+
+## Delete NA in Wage
+h1b=h1b[!is.na(h1b$PREVAILING_WAGE),]
+
 ## Save cleaned data
 save(h1b,file="../output/cleaned_data.Rdata")
 
