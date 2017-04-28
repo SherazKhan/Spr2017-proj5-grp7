@@ -25,7 +25,7 @@
 	
 **Contribution statement**:  
 Vanessa Huang cleaned dataset. 
-Yifei Lin designed Project Overview Penal. 
+Yifei Lin designed Project Overview penal. 
 Yifei Lin and Vanessa Huang designed Interactive Map penal and designed Statistical Analysis penal. 
 Yuxi Zhou designed Data Science Related Job Analysis penal and wrote Brief Summary.pdf. 
 Yifei Lin carries out presentation.
