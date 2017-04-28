@@ -23,7 +23,16 @@
           
        <img src="figs/3.jpeg" alt="alt text">
 	
-**Contribution statement**: ([default](doc/a_note_on_contributions.md)) All team members contributed equally in all stages of this project. All team members approve our work presented in this GitHub repository including this contributions statement. 
+**Contribution statement**: 
+Chengcen Zhou and Vanessa Huang updated ReadMe file. 
+Vanessa Huang cleaned dataset. 
+Yifei Lin designed Project Overview Penal. 
+Yifei Lin and Vanessa Huang designed Interactive map penal. 
+Yifei Lin and Vanessa designed Statistical Analysis penal. 
+Yuxi Zhou designed Data science related job analysis penal. 
+Yuxi Zhou wrote Brief Summary.pdf. 
+Yifei Lin carries out presentation.
+
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
 
