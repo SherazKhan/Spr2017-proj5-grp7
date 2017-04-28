@@ -137,10 +137,12 @@ data_science_df <- plot_input(job_filter(h1b,job_list),
                               "TotalApps")
 ds1<-plot_output(data_science_df, "JOB_INPUT_CLASS","YEAR", "TotalApps", "JOB CLASS", "NO. OF APPLICATIONS")
 
+ds2 <-plot_ly(data = job_filter(h1b,job_list),x=~JOB_INPUT_CLASS,y= ~PREVAILING_WAGE,color = ~YEAR,type = "box") %>%
+  layout(boxmode="group",
+         yaxis = list(title="WAGE (USD)",
+                                      range = c(25000,200000)),
+         xaxis = list(title="Job Title"))
 
-ds2<-ggplot(job_filter(h1b,job_list), aes(x=JOB_INPUT_CLASS,y= PREVAILING_WAGE)) +
-  geom_boxplot(aes(fill=YEAR)) + xlab("JOB TITLE") + ylab("WAGE (USD)") +
-  get_theme() + coord_cartesian(ylim=c(25000,200000))
 
 h1b%>%
   mutate(SOC_NAME = toupper(SOC_NAME)) -> h1b

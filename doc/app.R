@@ -1,7 +1,7 @@
 ## APP ##
 
 #### Install Libraries ####
-packages.used <- c("shiny","shinydashboard","plotly","plyr","dplyr","lazyeval","ggplot2","reshape2")
+packages.used <- c("shiny","shinydashboard","plotly","plyr","dplyr","lazyeval","ggplot2","reshape2","cellranger","hashmap","readxl","rematch")
 
 packages.needed <- setdiff(packages.used, 
                            intersect(installed.packages()[,1], 
@@ -23,7 +23,7 @@ library(ggplot2)
 library(reshape2)
 
 #### Source helper functions ####
-load("../output/cleaned_data.Rdata")
+load("../output/cleaned_data.Rdata",.GlobalEnv)
 source("../lib/graph_helper.R")
 source("../lib/ds_helper.R")
 
