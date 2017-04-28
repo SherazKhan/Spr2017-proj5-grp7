@@ -1,4 +1,4 @@
-# ADS Project 5: "Survival or Not" - H-1B Deny Analysis Shiny App
+# ADS Project 5: "Survive or Not" - H-1B Visa Petition Analysis Shiny App
 
 ![H1B Visa](http://www.spotlifeasia.com/wp-content/uploads/2017/01/Trump-H1b-Visa.png)
 
@@ -14,7 +14,7 @@
 	+ Chengcen Zhou, cz2432
 	
 + Project summary: 
-	+ The H-1B is an employment-based, non-immigrant visa category for temporary foreign workers in the United States. For a foreign national to apply for H1-B visa, an US employer must offer a job and petition for H-1B visa with the US immigration department. This is the most common visa status applied for and held by international students once they complete college/ higher education (Masters, PhD) and work in a full-time position. The Office of Foreign Labor Certification (OFLC) generates program data that is useful information about the immigration programs including the H1-B visa. The raw data could be downloaded [here](https://www.foreignlaborcert.doleta.gov/performancedata.cfm).
+	+ The H-1B is an employment-based, non-immigrant visa category for temporary foreign workers in the United States. For a foreign national to apply for H1-B visa, an US employer must offer a job and petition for H-1B visa with the US immigration department. This is the most common visa status applied for and held by international students once they complete college/higher education (Masters, PhD) and work in the US. The Office of Foreign Labor Certification (OFLC) generates program data that is useful information about the immigration programs including the H1-B visa. The raw data could be downloaded [here](https://www.foreignlaborcert.doleta.gov/performancedata.cfm).
 	
 **Contribution statement**: ([default](doc/a_note_on_contributions.md)) All team members contributed equally in all stages of this project. All team members approve our work presented in this GitHub repository including this contributions statement. 
 
