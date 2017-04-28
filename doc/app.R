@@ -208,9 +208,9 @@ body <- dashboardBody(
                  plotlyOutput("ds1")),
           
           infoBox(title = "Observations",
-                  "1.Data Scientist and Data Engineer positions have observed an exponential growth in the last 6 years.\n
-                  2.Job Titles with Machine Learning explicitly in them are still few in number (< 75 in any year).\n
-                  3.In 2016, Data Scientist position broke the 1000 barrier on the number of H-1B Visa applications.",
+                  "1.There has been a exponential increase in H1b certified positions in Data Scientist and Data Engineer.
+                  2.As an emerging insustry, jobs titled machine learning are still in a small number.
+                  3.Data Scientist in H1b applicants grow up above 1000 in 2016, with a positive trend on increase",
                   icon = icon("list"),color = "blue",width = NULL)
         ),
         
@@ -220,12 +220,12 @@ body <- dashboardBody(
           box(width=NULL,
                  plotlyOutput("ds2")),
           
-          infoBox(title = "Observations",
-                  "1.Machine Learning jobs have the highest median wage although the number of Job Titles with Machine Learning explicitly in them are less than 75 in any year.\t
-                  2.Median wage for Data Engineer jobs is consistently increasing.\t
-                 3. Median wage for Data Scientist positions is negligibly decreasing since 2012 although this is the position that has seen the most growth in the last 6 years.",
+         infoBox(title = "Observations",
+                  "1.Although small in total number, jobs titled in Machine learning gets the highest median wage among three jobs
+                   2.As for Data Scientist job, increasing in number, the wage range is decreasing starting from 2012.
+                   3.Data Engineering job salaries are growing in the last 6 years",
                   icon = icon("list"),color = "purple",width = NULL)
-          ),
+         ),
         tabPanel(
           title = "App trend of industry",
           box(width=NULL,
@@ -242,7 +242,7 @@ body <- dashboardBody(
           box(width=NULL,
               plotlyOutput("ds4")),
           
-          infoBox(title = "Highest salaries belong to",
+          infoBox(title = "Highest salary industries",
                   "1.Mathematicians
                    2.Computer and Information Research Scientists
                    3.Software Developers, Systems Software",
