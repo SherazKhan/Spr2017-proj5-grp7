@@ -10,8 +10,6 @@
 	+ Yifei Lin, yl3594
 	+ Vanessa Huang, yh2873
 	+ Yuxi Zhou, yz3048
-	+ Siyuan Yao, sy2696
-	+ Chengcen Zhou, cz2432
 	
 + Project summary: 
 	+ The H-1B is an employment-based, non-immigrant visa category for temporary foreign workers in the United States. For a foreign national to apply for H1-B visa, an US employer must offer a job and petition for H-1B visa with the US immigration department. This is the most common visa status applied for and held by international students once they complete college/higher education (Masters, PhD) and work in the US. The Office of Foreign Labor Certification (OFLC) generates program data that is useful information about the immigration programs including the H1-B visa. The raw data could be downloaded [here](https://drive.google.com/file/d/0B7g7UviLDlhuVjhaLWVLZW5WS2c/view?usp=sharing).
@@ -24,13 +22,12 @@
        <img src="figs/3.jpeg" alt="alt text">
 	
 **Contribution statement**:  
-Vanessa Huang cleaned dataset and Siyuan Yao made more advancement on clean data.
+Vanessa Huang cleaned dataset.
 Yifei Lin designed Project Overview penal. 
 Yifei Lin and Vanessa Huang designed Interactive Map penal and Statistical Analysis penal. 
 Yuxi Zhou designed Data Science Related Job Analysis penal and wrote Brief Summary.pdf. 
-Vanessa Huang published the app.
-Yifei Lin carries out presentation.
-Vanessa Huang，Chengcen Zhou and Siyuan Yao updated ReadMe file.
+Vanessa Huang published the app and updated ReadMe file.
+Yifei Lin carried out presentation.
 
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
